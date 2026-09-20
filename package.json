@@ -1,0 +1,17 @@
+{
+  "name": "mineflayer-bot",
+  "version": "1.0.0",
+  "description": "Mineflayer bot for Aternos",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "mineflayer": "^4.20.1",
+    "mineflayer-armor-manager": "^2.0.1",
+    "mineflayer-auto-eat": "^1.4.0",
+    "mineflayer-pathfinder": "^2.4.5",
+    "mineflayer-pvp": "^1.3.2"
+  }
+}
+
