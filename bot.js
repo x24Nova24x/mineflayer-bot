@@ -43,6 +43,23 @@ bot.once('spawn', () => {
     startAt: 14,
     bannedFood: ['rotten_flesh', 'pufferfish', 'spider_eye', 'poisonous_potato']
   };
+
+  // --- NATURAL HUMAN BEHAVIORS ---
+  // 1. Random Head Looks when idle
+  setInterval(() => {
+    if (!bot.pathfinder.isMoving() && !isProtecting) {
+      const yaw = (Math.random() * Math.PI * 2) - Math.PI;
+      const pitch = (Math.random() * 0.4) - 0.2;
+      bot.look(yaw, pitch, false);
+    }
+  }, 4000);
+
+  // 2. Occasional arm swing when idle
+  setInterval(() => {
+    if (!bot.pathfinder.isMoving() && Math.random() < 0.25) {
+      bot.swingArm('right');
+    }
+  }, 6000);
 });
 
 function isAuthorized(username) {
@@ -55,6 +72,19 @@ bot.on('chat', async (username, message) => {
   const rawMsg = message.trim();
   const args = rawMsg.toLowerCase().split(' ');
   const command = args[0];
+
+  // Look at the player who spoke in chat
+  const speaker = bot.players[username]?.entity;
+  if (speaker) {
+    bot.lookAt(speaker.position.offset(0, speaker.height, 0));
+  }
+
+  // --- SKIN CHANGE COMMAND ---
+  if (command === '!skin' && args[1]) {
+    const skinName = args[1];
+    bot.chat(`/skin set ${skinName}`);
+    return;
+  }
 
   // Owner Trust Commands
   if (username === BOT_OWNER) {
@@ -272,4 +302,3 @@ bot.on('end', () => {
     process.exit(1);
   }, 10000);
 });
-
