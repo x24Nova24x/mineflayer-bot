@@ -4,6 +4,12 @@ const pvp = require('mineflayer-pvp');
 const armorManager = require('mineflayer-armor-manager');
 const autoEat = require('mineflayer-auto-eat');
 
+const express = require('express');
+const app = express();
+
+app.get('/', (req, res) => res.send('Bot status: Online'));
+app.listen(3000, () => console.log('Keep-alive server active on port 3000'));
+
 // --- CONFIGURATION ---
 const BOT_OWNER = 'x24_Nova_24x';
 const BOT_USERNAME = 'x12_H4CK3R_12x';
