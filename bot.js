@@ -1,7 +1,8 @@
 const mineflayer = require('mineflayer');
 const { pathfinder } = require('mineflayer-pathfinder');
 const pvp = require('mineflayer-pvp').plugin;
-const armorManager = require('mineflayer-armor-manager');
+const armorManager = require('mineflayer-armor-manager').armorManager;
+const autoEat = require('mineflayer-auto-eat').plugin;
 const autoEat = require('mineflayer-auto-eat').plugin;
 const autoEat = require('mineflayer-auto-eat').plugin;
 
