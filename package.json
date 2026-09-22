@@ -10,7 +10,7 @@
     "minecraft-data": "^3.80.0",
     "mineflayer": "^4.20.1",
     "mineflayer-armor-manager": "^2.0.1",
-    "mineflayer-auto-eat": "^1.4.0",
+    "mineflayer-auto-eat": "latest",
     "mineflayer-pathfinder": "^2.4.5",
     "mineflayer-pvp": "^1.3.2"
   }
