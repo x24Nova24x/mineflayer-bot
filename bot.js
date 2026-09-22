@@ -1,8 +1,8 @@
 const mineflayer = require('mineflayer');
 const { pathfinder } = require('mineflayer-pathfinder');
-const pvp = require('mineflayer-pvp').plugin;
-const armorManager = require('mineflayer-armor-manager').armorManager;
-const autoEat = require('mineflayer-auto-eat').plugin;
+const pvp = require('mineflayer-pvp');
+const armorManager = require('mineflayer-armor-manager');
+const autoEat = require('mineflayer-auto-eat');
 
 // --- CONFIGURATION ---
 const BOT_OWNER = 'x24_Nova_24x';
@@ -20,9 +20,9 @@ const bot = mineflayer.createBot({
 
 // Load Plugins
 bot.loadPlugin(pathfinder);
-bot.loadPlugin(pvp);
-bot.loadPlugin(armorManager);
-bot.loadPlugin(autoEat);
+bot.loadPlugin(pvp.plugin || pvp);
+bot.loadPlugin(armorManager.armorManager || armorManager.plugin || armorManager);
+bot.loadPlugin(autoEat.plugin || autoEat);
 
 // State Settings
 const trustedPlayers = new Set();
