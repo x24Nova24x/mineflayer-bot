@@ -33,9 +33,28 @@ let protectTarget = null;
 let protectMode = 'all'; // 'mobs', 'players', 'all'
 let spamInterval = null;
 
+// --- HUMAN-LIKE LOOK SMOOTHING ---
+async function smoothLookAt(targetPos) {
+  const eyePos = bot.entity.position.offset(0, bot.entity.height, 0);
+  const delta = targetPos.minus(eyePos);
+  
+  const targetYaw = Math.atan2(-delta.x, -delta.z);
+  const targetPitch = Math.atan2(delta.y, Math.hypot(delta.x, delta.z));
+
+  const steps = 6;
+  for (let i = 1; i <= steps; i++) {
+    const currentYaw = bot.entity.yaw + (targetYaw - bot.entity.yaw) * (i / steps);
+    const currentPitch = bot.entity.pitch + (targetPitch - bot.entity.pitch) * (i / steps);
+    await bot.look(currentYaw, currentPitch, true);
+    await new Promise(res => setTimeout(res, 20));
+  }
+}
+
 bot.once('spawn', () => {
   console.log(`✅ Bot ${bot.username} connected to ${SERVER_HOST}:${SERVER_PORT}`);
-  const defaultMove = new Movements(bot);
+  const mcData = require('minecraft-data')(bot.version);
+  const defaultMove = new Movements(bot, mcData);
+  defaultMove.canDig = false;
   bot.pathfinder.setMovements(defaultMove);
 
   bot.autoEat.options = {
@@ -45,14 +64,20 @@ bot.once('spawn', () => {
   };
 
   // --- NATURAL HUMAN BEHAVIORS ---
-  // 1. Random Head Looks when idle
+  // 1. Random Head Looks & Micro-Shifts when idle
   setInterval(() => {
     if (!bot.pathfinder.isMoving() && !isProtecting) {
-      const yaw = (Math.random() * Math.PI * 2) - Math.PI;
-      const pitch = (Math.random() * 0.4) - 0.2;
-      bot.look(yaw, pitch, false);
+      const yaw = bot.entity.yaw + (Math.random() * 0.8 - 0.4);
+      const pitch = Math.random() * 0.2 - 0.1;
+      bot.look(yaw, pitch, true);
+
+      if (Math.random() < 0.2) {
+        const dir = Math.random() < 0.5 ? 'left' : 'right';
+        bot.setControlState(dir, true);
+        setTimeout(() => bot.setControlState(dir, false), 150 + Math.random() * 200);
+      }
     }
-  }, 4000);
+  }, 3500);
 
   // 2. Occasional arm swing when idle
   setInterval(() => {
@@ -73,10 +98,20 @@ bot.on('chat', async (username, message) => {
   const args = rawMsg.toLowerCase().split(' ');
   const command = args[0];
 
-  // Look at the player who spoke in chat
+  // Smoothly turn head toward the speaker
   const speaker = bot.players[username]?.entity;
   if (speaker) {
-    bot.lookAt(speaker.position.offset(0, speaker.height, 0));
+    smoothLookAt(speaker.position.offset(0, speaker.height, 0));
+  }
+
+  // Natural Chat Phrases (Triggers commands directly from plain speech)
+  if (rawMsg.toLowerCase().includes('protect me') || rawMsg.toLowerCase().includes('guard me')) {
+    requestAction(username, 'protect', username);
+    return;
+  }
+  if (rawMsg.toLowerCase().includes('follow me') || rawMsg.toLowerCase().includes('come here')) {
+    requestAction(username, 'follow', username);
+    return;
   }
 
   // --- SKIN CHANGE COMMAND ---
@@ -146,7 +181,7 @@ bot.on('chat', async (username, message) => {
       return;
     }
 
-    if (command === 'stop') {
+    if (command === 'stop' || command === 'hold on') {
       isProtecting = false;
       protectTarget = null;
       if (spamInterval) clearInterval(spamInterval);
@@ -232,7 +267,7 @@ async function executeAction(action, data) {
   if (action === 'lookat') {
     const player = bot.players[data]?.entity;
     if (player) {
-      bot.lookAt(player.position.offset(0, player.height, 0));
+      smoothLookAt(player.position.offset(0, player.height, 0));
     }
   }
 
@@ -270,7 +305,23 @@ async function executeAction(action, data) {
   }
 }
 
+// Natural Jump & Physics Loop
 bot.on('physicTick', () => {
+  // Auto-jump 1-block obstacles while walking
+  if (bot.pathfinder.isMoving()) {
+    const blockInFront = bot.blockAt(bot.entity.position.offset(
+      -Math.sin(bot.entity.yaw),
+      0,
+      -Math.cos(bot.entity.yaw)
+    ));
+
+    if (blockInFront && blockInFront.boundingBox === 'block' && bot.entity.onGround) {
+      bot.setControlState('jump', true);
+      setTimeout(() => bot.setControlState('jump', false), 250);
+    }
+  }
+
+  // Protection Logic
   if (!isProtecting || !protectTarget) return;
 
   const targetEntity = bot.players[protectTarget]?.entity;
