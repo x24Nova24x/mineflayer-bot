@@ -3,8 +3,6 @@ const { pathfinder } = require('mineflayer-pathfinder');
 const pvp = require('mineflayer-pvp').plugin;
 const armorManager = require('mineflayer-armor-manager').armorManager;
 const autoEat = require('mineflayer-auto-eat').plugin;
-const autoEat = require('mineflayer-auto-eat').plugin;
-const autoEat = require('mineflayer-auto-eat').plugin;
 
 // --- CONFIGURATION ---
 const BOT_OWNER = 'x24_Nova_24x';
