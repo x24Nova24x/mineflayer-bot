@@ -347,6 +347,10 @@ bot.on('physicTick', () => {
 });
 
 // Auto Reconnect Listener
+bot.on('error', (err) => {
+  console.log('Connection error:', err.message);
+});
+
 bot.on('end', () => {
   console.log('Bot disconnected. Reconnecting in 10 seconds...');
   setTimeout(() => {
